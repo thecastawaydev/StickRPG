@@ -5,7 +5,14 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
 
 /**
  * Created by rooo on 11/16/2015.
@@ -14,8 +21,15 @@ public class Player {
     Sprite bucket;
     Rectangle playerRect;
     final MainGame game;
-
+    
+	
+	final float pixelToMeters = 100f;
+	Body body;
+	
+	InputHelper iHelper;
+	
     public Player(final MainGame gam) {
+    	iHelper = new InputHelper(this);
         game = gam;
         bucket = new Sprite(new Texture("player.png"));
         bucket.setPosition(50, 50);
@@ -26,33 +40,36 @@ public class Player {
         playerRect.y = bucket.getY();
         playerRect.width = 64;
         playerRect.height = 64;
+        
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.type = BodyDef.BodyType.DynamicBody;
+        bodyDef.position.set((bucket.getX() * bucket.getWidth()/2) / pixelToMeters, (bucket.getY() * bucket.getHeight() / 2) / pixelToMeters);
+        body = game.world.createBody(bodyDef);
+        
+        PolygonShape shape = new PolygonShape();
+        shape.setAsBox(bucket.getWidth() / 2 / pixelToMeters, bucket.getHeight() / 2 / pixelToMeters);
+        
+        FixtureDef fd = new FixtureDef();
+        fd.shape = shape;
+        fd.density = 0.1f;
+        fd.friction = 10f;
+        
+        body.createFixture(fd);
+        shape.dispose();
+        
+        
     }
 
     public void updatePlayer(){
+        game.world.step(1f / 60f, 6, 2);
+        
+    	bucket.setPosition((body.getPosition().x * pixelToMeters) - bucket.getWidth() / 2,  (body.getPosition().y * pixelToMeters) - bucket.getHeight() / 2);
+    	
         playerRect.x = bucket.getX();
-        playerRect.y = bucket.getY();
+        playerRect.y = bucket.getY();  
     }
 
-    public void handleInput(int mapWidth, int mapHeight){
-        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            game.cameraHelper.cam.zoom += 0.02;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
-            game.cameraHelper.cam.zoom -= 0.02;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            game.player.bucket.translateX(-0.3f);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            game.player.bucket.translateX(0.3f);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-            game.player.bucket.translateY(-0.3f);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-            game.player.bucket.translateY(0.3f);
-        }
-
+   public void handleInput(int mapWidth, int mapHeight){
         if(game.player.bucket.getX() < 0)
             game.player.bucket.setX(0);
         if(game.player.bucket.getX() - game.player.bucket.getWidth() >= mapWidth - 2)

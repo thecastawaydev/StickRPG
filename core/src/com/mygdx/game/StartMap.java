@@ -10,8 +10,10 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 
 /**
  * Created by rooo on 11/16/2015.
@@ -27,6 +29,11 @@ public class StartMap implements Screen {
     Sprite map;
     ShapeRenderer sp;
 
+	Box2DDebugRenderer dr;
+	Matrix4 dm;
+	
+	final float ptm = 100f;
+	
     public StartMap(final MainGame gam){
         game = gam;
 
@@ -36,6 +43,8 @@ public class StartMap implements Screen {
         map.setSize(mapWidth, mapHeight);
 
         rect = new Rectangle(14, 29, 5, 5);
+        
+        dr = new Box2DDebugRenderer();
     }
 
     @Override
@@ -60,27 +69,33 @@ public class StartMap implements Screen {
         game.batch.setProjectionMatrix(game.cameraHelper.cam.combined);
         sp.setProjectionMatrix(game.cameraHelper.cam.combined);
 
+        dm = game.batch.getProjectionMatrix().cpy().scale(100, 100, 0);
         game.batch.begin();
         map.draw(game.batch);
         game.player.bucket.draw(game.batch);
         game.player.updatePlayer();
         game.batch.end();
 
-        sp.begin(ShapeRenderer.ShapeType.Line);
+        
+        dr.render(game.world, dm);
+        /*sp.begin(ShapeRenderer.ShapeType.Line);
         sp.setColor(Color.RED);
         sp.rect(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
         sp.rect(game.player.playerRect.getX(), game.player.playerRect.getY(), game.player.bucket.getWidth(), game.player.bucket.getHeight());
-        sp.end();
+        sp.end();*/
+        
     }
 
     private void drawGui(){
         game.batch.setProjectionMatrix(game.cameraHelper.guiCam.combined);
         game.batch.begin();
         game.font.draw(game.batch, game.player.bucket.getX() + " : " + game.player.bucket.getY(), 1, 1);
+        game.font.draw(game.batch, game.player.body.getPosition().toString(), 3, 30);
         if(rect.contains(game.player.bucket.getX() + 1, game.player.bucket.getY() + 1) && Gdx.input.isKeyPressed(Input.Keys.E)){
             game.font.draw(game.batch, "SITHEITHE", 50, 50);
             game.setScreen(new SecondMap(game));
-            game.player.bucket.setPosition(17, 1);
+            //game.player.bucket.setPosition(17, 1);
+            game.player.body.setTransform(17 / ptm, 1 / ptm , 0);
             dispose();
         }
         game.batch.end();

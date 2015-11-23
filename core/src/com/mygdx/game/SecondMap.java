@@ -23,6 +23,8 @@ public class SecondMap implements Screen {
     Sprite map;
     ShapeRenderer sp;
 
+    final float ptm = 100;
+    
     public SecondMap(final MainGame gam){
         game = gam;
 
@@ -32,8 +34,6 @@ public class SecondMap implements Screen {
         map.setSize(mapWidth, mapHeight);
 
         rect = new Rectangle(16, 0, 5, 5);
-
-
     }
 
     @Override
@@ -58,12 +58,14 @@ public class SecondMap implements Screen {
         game.batch.setProjectionMatrix(game.cameraHelper.guiCam.combined);
         game.batch.begin();
         game.font.draw(game.batch, game.player.bucket.getX() + " : " + game.player.bucket.getY(), 1, 1);
+        game.font.draw(game.batch, game.player.body.getPosition().toString(), 3, 30);
         game.batch.end();
         
         if(rect.contains(game.player.bucket.getX() + 1, game.player.bucket.getY() + 1) && Gdx.input.isKeyPressed(Input.Keys.E)){
 
             game.setScreen(new StartMap(game));
             game.player.bucket.setPosition(16, 31);
+            game.player.body.setTransform(16 / ptm, 31 / ptm, 0);
             dispose();
         }
         sp.begin(ShapeRenderer.ShapeType.Line);

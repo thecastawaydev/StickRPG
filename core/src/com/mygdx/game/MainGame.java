@@ -18,6 +18,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
 
@@ -29,9 +30,11 @@ public class MainGame extends Game {
     public BitmapFont font;
     public Player player;
     public CameraHelper cameraHelper;
-
+    public World world;
+    
     @Override
     public void create () {
+    	world = new World(new Vector2(0, 0), true);
         batch = new SpriteBatch();
         font = new BitmapFont();
         cameraHelper = new CameraHelper();
